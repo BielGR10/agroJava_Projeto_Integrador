@@ -28,6 +28,7 @@ public class Main {
                         volume[dia] = input.nextDouble();
                         dia++;
                     }
+                    break;
                 case 2:
                     if(dados == false){
                         for (int i=0 ; i <=15; i++) {
@@ -43,6 +44,7 @@ public class Main {
                                     """+linha);
                             umidade[linha][coluna] =  input.nextDouble();
                             linha++;
+
                             if(linha == 4){
                                 linha = 0;
                                 coluna++;
@@ -58,6 +60,43 @@ public class Main {
                         System.out.println("3 "+umidade[2][0]+" "+umidade[2][1]+" "+umidade[2][2]+" "+umidade[2][3]);
                         System.out.println("4 "+umidade[3][0]+" "+umidade[3][1]+" "+umidade[3][2]+" "+umidade[3][3]);
                     }
+                    break;
+
+                case 3:
+                    if(!dados){
+                        System.out.println("Cadastre os dados primeiros!");
+                        break;
+                    }else{
+                        boolean alerta = false;
+
+
+                        for(int l = 0; l < 4; l++){
+                            for (int c = 0; c < 4; c++){
+
+                                double umidadeTalhao = umidade[l][c];
+
+                                if(umidadeTalhao < 30){
+                                    System.out.println("O talhão "+(l+1)+"X"+(c+1)+" precisa de irrigação.");
+
+
+                                    alerta = true;
+                                }
+                            }
+                        }
+
+                        if(!alerta){
+                            System.out.println("Todos os setores estão bem irrigados.");
+                        }
+                    }
+                    break;
+
+                case 4:
+                    System.out.println("Sistema encerrando...");
+                    break;
+
+
+                default:
+                    System.out.println("Opção inválida! escolha um número de 1-4.");
             }
         }while(escolha != 4);
 
