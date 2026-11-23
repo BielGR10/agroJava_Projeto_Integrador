@@ -33,7 +33,8 @@ public class Main {
                     2) Exibir Mapa do Campo
                     3) Relatório de Alertas de Irrigação
                     4) Consultar Histórico
-                    5) Sair
+                    5) Identificar Semana Mais Chuvosa
+                    6) Sair
                     """);
             escolha = input.nextInt();
 
@@ -165,13 +166,54 @@ public class Main {
                     break;
 
                 case 5:
+                    if (!arquivo.exists() || arquivo.length() == 0) {
+                        System.out.println("Nenhum histórico encontrado. Cadastre os dados primeiro!\n");
+                        break;
+                    }
+
+                    try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
+                        String linhaCsv = reader.readLine();
+                        double maiorTotal = -1.0;
+                        String semanaMaisChuvosa = "";
+                        String totalFormatado = "";
+
+                        while ((linhaCsv = reader.readLine()) != null) {
+                            if (linhaCsv.trim().isEmpty()) {
+                                continue;
+                            }
+
+                            String[] colunas = linhaCsv.split(",");
+                            double totalAtual = Double.parseDouble(colunas[9]);
+
+                            if (totalAtual > maiorTotal) {
+                                maiorTotal = totalAtual;
+                                semanaMaisChuvosa = colunas[0];
+                                totalFormatado = colunas[9];
+                            }
+                        }
+
+                        if (maiorTotal >= 0) {
+                            System.out.println("Semana mais chuvosa:");
+                            System.out.println(semanaMaisChuvosa);
+                            System.out.println("Total:");
+                            System.out.println(totalFormatado + " mm\n");
+                        } else {
+                            System.out.println("Nenhum registro salvo no histórico.\n");
+                        }
+
+                    } catch (IOException e) {
+                        System.out.println("Erro ao ler o arquivo CSV: " + e.getMessage());
+                    }
+                    break;
+
+                case 6:
                     System.out.println("Sistema encerrando...");
                     break;
 
                 default:
-                    System.out.println("Opção inválida! Escolha um número de 1-5.");
+                    System.out.println("Opção inválida! Escolha um número de 1-6.");
             }
-        } while (escolha != 5);
+        } while (escolha != 6);
 
         input.close();
     }
