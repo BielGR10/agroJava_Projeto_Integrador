@@ -1,7 +1,9 @@
 package org.example;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Locale;
@@ -9,7 +11,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        // Locale.US garante uso de ponto (.) nos decimais, compatível com o CSV
+
         Scanner input = new Scanner(System.in).useLocale(Locale.US);
         File arquivo = new File("relatorio.csv");
 
@@ -30,13 +32,14 @@ public class Main {
                     1) Cadastrar Dados
                     2) Exibir Mapa do Campo
                     3) Relatório de Alertas de Irrigação
-                    4) Sair
+                    4) Consultar Histórico
+                    5) Sair
                     """);
             escolha = input.nextInt();
 
             switch (escolha) {
                 case 1:
-                    input.nextLine(); // Limpa o buffer do teclado após o nextInt()
+                    input.nextLine();
                     System.out.print("Digite a data da semana (ex: 10/11/2026): ");
                     String dataSemana = input.nextLine();
 
@@ -50,17 +53,14 @@ public class Main {
 
                     double mediaChuva = totalChuva / 7.0;
 
-                    // Verifica se o arquivo já existe para saber se precisa criar o cabeçalho
                     boolean arquivoNovo = !arquivo.exists() || arquivo.length() == 0;
 
-                    // O parâmetro 'true' no FileWriter garante que não sobrescreva semanas anteriores
                     try (BufferedWriter writer = new BufferedWriter(new FileWriter(arquivo, true))) {
                         if (arquivoNovo) {
                             writer.write("data,seg,ter,qua,qui,sex,sab,dom,media,total");
                             writer.newLine();
                         }
 
-                        // Monta a linha no formato CSV esperado
                         String registro = String.format(Locale.US,
                                 "%s,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f",
                                 dataSemana,
@@ -132,13 +132,46 @@ public class Main {
                     break;
 
                 case 4:
+                    if (!arquivo.exists() || arquivo.length() == 0) {
+                        System.out.println("Nenhum histórico encontrado. Cadastre os dados primeiro!\n");
+                        break;
+                    }
+
+                    try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
+                        String linhaCsv = reader.readLine();
+                        boolean temRegistros = false;
+
+                        while ((linhaCsv = reader.readLine()) != null) {
+                            if (linhaCsv.trim().isEmpty()) {
+                                continue;
+                            }
+
+                            String[] colunas = linhaCsv.split(",");
+
+                            System.out.println("Semana: " + colunas[0]);
+                            System.out.println("Média: " + colunas[8] + " mm");
+                            System.out.println("Total: " + colunas[9] + " mm");
+                            System.out.println("-------------------------");
+                            temRegistros = true;
+                        }
+
+                        if (!temRegistros) {
+                            System.out.println("Nenhum registro salvo no histórico.\n");
+                        }
+
+                    } catch (IOException e) {
+                        System.out.println("Erro ao ler o arquivo CSV: " + e.getMessage());
+                    }
+                    break;
+
+                case 5:
                     System.out.println("Sistema encerrando...");
                     break;
 
                 default:
-                    System.out.println("Opção inválida! Escolha um número de 1-4.");
+                    System.out.println("Opção inválida! Escolha um número de 1-5.");
             }
-        } while (escolha != 4);
+        } while (escolha != 5);
 
         input.close();
     }
