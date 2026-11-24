@@ -34,7 +34,8 @@ public class Main {
                     3) Relatório de Alertas de Irrigação
                     4) Consultar Histórico
                     5) Identificar Semana Mais Chuvosa
-                    6) Sair
+                    6) Dashboard Climático
+                    7) Sair
                     """);
             escolha = input.nextInt();
 
@@ -207,13 +208,66 @@ public class Main {
                     break;
 
                 case 6:
+                    if (!arquivo.exists() || arquivo.length() == 0) {
+                        System.out.println("Nenhum histórico encontrado. Cadastre os dados primeiro!\n");
+                        break;
+                    }
+
+                    try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
+                        String linhaCsv = reader.readLine();
+                        int semanasCadastradas = 0;
+                        double volumeAcumulado = 0.0;
+                        double maiorChuva = -1.0;
+                        double menorChuva = Double.MAX_VALUE;
+
+                        while ((linhaCsv = reader.readLine()) != null) {
+                            if (linhaCsv.trim().isEmpty()) {
+                                continue;
+                            }
+
+                            String[] colunas = linhaCsv.split(",");
+                            double totalAtual = Double.parseDouble(colunas[9]);
+
+                            semanasCadastradas++;
+                            volumeAcumulado += totalAtual;
+
+                            if (totalAtual > maiorChuva) {
+                                maiorChuva = totalAtual;
+                            }
+                            if (totalAtual < menorChuva) {
+                                menorChuva = totalAtual;
+                            }
+                        }
+
+                        if (semanasCadastradas > 0) {
+                            double mediaGeral = volumeAcumulado / semanasCadastradas;
+
+                            System.out.println("===== DASHBOARD =====");
+                            System.out.println("Semanas cadastradas: " + semanasCadastradas);
+                            System.out.printf(Locale.US, "Volume acumulado: %.1f mm%n", volumeAcumulado);
+                            System.out.println("Maior chuva:");
+                            System.out.printf(Locale.US, "%.1f mm%n", maiorChuva);
+                            System.out.println("Menor chuva:");
+                            System.out.printf(Locale.US, "%.1f mm%n", menorChuva);
+                            System.out.println("Média geral:");
+                            System.out.printf(Locale.US, "%.1f mm%n%n", mediaGeral);
+                        } else {
+                            System.out.println("Nenhum registro salvo no histórico.\n");
+                        }
+
+                    } catch (IOException e) {
+                        System.out.println("Erro ao ler o arquivo CSV: " + e.getMessage());
+                    }
+                    break;
+
+                case 7:
                     System.out.println("Sistema encerrando...");
                     break;
 
                 default:
-                    System.out.println("Opção inválida! Escolha um número de 1-6.");
+                    System.out.println("Opção inválida! Escolha um número de 1-7.");
             }
-        } while (escolha != 6);
+        } while (escolha != 7);
 
         input.close();
     }
